@@ -1,6 +1,7 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
 const { formatHour, formatMoney, formatDate } = require("./util/format");
+
 class scrapeHtml {
   constructor() {
     this.finalResult = {
@@ -69,7 +70,16 @@ class scrapeHtml {
       dates = dates.concat(date);
     });
 
-    //
+    //Create array direction to check when to push passenger Array into Object
+    let travelWay = [];
+    $(".product-details .travel-way").each((i, el) => {
+      const direction = $(el)
+        .text()
+        .trim();
+      travelWay[i] = direction;
+    });
+
+    //Roundtrips details
     const roundTrips = [];
     $(".product-details").each((i, el) => {
       const direction = $(el)
@@ -105,6 +115,17 @@ class scrapeHtml {
         .next()
         .text()
         .trim();
+
+      //check if we should push passenger array into Aller or Retour direction
+      let hasPassenger = null;
+      direction === "Retour" ||
+      (travelWay[i + 1] === "Aller" || !travelWay[i + 1])
+        ? (hasPassenger = true)
+        : (hasPassenger = false);
+
+      //If hasPassenger is true then extract data to push into Object. If false dont do anything
+
+      //Create roundTrip Object
       const roundTrip = {
         type: direction,
         date: formatDate(dates[i]),
@@ -115,7 +136,8 @@ class scrapeHtml {
             arrivalTime: arrivalTime,
             arrivalStation: arrivalStation,
             type: typeTrain,
-            number: idTrain
+            number: idTrain,
+            ...(hasPassenger ? { passenger: [1] } : false)
           }
         ]
       };
@@ -123,6 +145,8 @@ class scrapeHtml {
     });
     this.resultTrips($, roundTrips);
   }
+
+  //CustomPrices
   customPrices($) {
     //find trip price then loop through array
     const custom = [];
@@ -140,10 +164,9 @@ class scrapeHtml {
     const cartePrice = formatMoney($(".amount").text());
     cartePrice ? custom.push({ value: cartePrice }) : null;
 
-    //return
     return (this.finalResult.result.custom.prices = custom);
   }
 }
 
-const abc = new scrapeHtml();
-abc.startScrape("test.html", "test.json");
+const scrapeMachine = new scrapeHtml();
+scrapeMachine.startScrape("test.html", "test.json");

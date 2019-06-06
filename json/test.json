@@ -32,7 +32,8 @@
                   "arrivalTime": "15:01",
                   "arrivalStation": "PARIS GARE DE LYON",
                   "type": "TGV",
-                  "number": "6618"
+                  "number": "6618",
+                  "passenger": [1]
                 }
               ]
             },
@@ -60,7 +61,8 @@
                   "arrivalTime": "18:30",
                   "arrivalStation": "PARIS GARE DE LYON",
                   "type": "TGV",
-                  "number": "6122"
+                  "number": "6122",
+                  "passenger": [1]
                 }
               ]
             }
