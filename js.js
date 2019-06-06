@@ -6,66 +6,117 @@ class scrapeHtml {
     this.finalResult = {
       status: "",
       result: {
-        trips: [], //resultTrips will be pushed into this array
-        custom: []
+        trips: [],
+        custom: {}
       }
     };
   }
 
-  // //Trips
-  // resultTrips = {
-  //   code: "SNIKXP", //table2
-  //   name: "dupont", //table1
-  //   details: {
-  //     price: 768.5, // table3
-  //     roundTrips: []
-  //   }
-  // };
-
-  // detailsRoundTrips = {
-  //   type: "Aller", //table1
-  //   date: "2016-09-02 00:00:00.000Z", //table1
-  //   trains: [] //detailsTrain will be pushed into this array
-  // };
-
-  // detailsTrain() {
-  //   departureTime: "16:57", //table1
-  //   departureStation: "PARIS GARE DE LYON", //table1
-  //   arrivalTime: "18:56", //table1
-  //   arrivalStation: "LYON PART DIEU", //table1
-  //   type: "TGV", //table1
-  //   number: "6687" //table1
-  //   passenger:"" //table1
-  // };
-
-  //custom
-
-  startScrape(fileName) {
-    this.htmlContent = fs.readFileSync(__dirname + `/html/${fileName}`, "utf8");
-    const $ = cheerio.load(this.htmlContent);
+  startScrape(htmlFile, jsonFile) {
+    //read File and load to cheerio
+    const htmlContent = fs.readFileSync(
+      __dirname + `/html/${htmlFile}`,
+      "utf8"
+    );
+    const $ = cheerio.load(htmlContent);
     this.customPrices($);
+    this.detailsRoundTrips($);
+
+    //Convert to JSON and write the file
+    const json = JSON.stringify(this.finalResult);
+    fs.writeFileSync(__dirname + `/json/${jsonFile}`, json);
   }
 
+  resultTrips($, roundTrips) {
+    //code
+    const code = $(
+      "#block-travel .digital-box-cell > .block-pnr .pnr-ref .pnr-info"
+    ).text();
+    //name
+    const name = $(
+      "#block-travel .digital-box-cell > .block-pnr .pnr-name .pnr-info"
+    ).text();
+    //price
+    const totalPrice = $(
+      "#block-payment .digital-box-cell > .total-amount .very-important"
+    ).text();
+    const trips = {
+      code: code,
+      name: name,
+      details: {
+        price: totalPrice,
+        roundTrips: roundTrips
+      }
+    };
+    return this.finalResult.result.trips.push(trips);
+  }
+
+  detailsRoundTrips($) {
+    const roundTrips = [];
+    $(".product-details").each((i, el) => {
+      const date = $(el)
+        .prev()
+        .find($(".product-travel-date"))
+        .text();
+      const direction = $(el)
+        .find($(".travel-way"))
+        .text();
+      const departureTime = $(el)
+        .find($(".origin-destination-hour.segment-departure"))
+        .text();
+      const departureStation = $(el)
+        .find($(".origin-destination-station.segment-departure"))
+        .text();
+      const arrivalTime = $(el)
+        .find($(".origin-destination-hour.segment-arrival"))
+        .text();
+      const arrivalStation = $(el)
+        .find($(".origin-destination-station.segment-arrival"))
+        .text();
+      const typeTrain = $(el)
+        .find($(".segment"))
+        .first()
+        .text();
+      const idTrain = $(el)
+        .find($(".segment"))
+        .first()
+        .next()
+        .text();
+      const roundTrip = {
+        type: direction,
+        date: date,
+        trains: {
+          departureTime: departureTime,
+          departureStation: departureStation,
+          arrivalTime: arrivalTime,
+          arrivalStation: arrivalStation,
+          type: typeTrain,
+          number: idTrain
+        }
+      };
+      roundTrips[i] = roundTrip;
+    });
+    this.resultTrips($, roundTrips);
+  }
   customPrices($) {
-    //find trip price
-    const customPrices = [];
+    //find trip price then loop through array
+    const custom = [];
     $(".product-header > tbody >tr").each((i, currEl) => {
       const result = $(currEl)
         .children()
         .last()
         .text();
-      customPrices.push({ value: result });
+      custom.push({ value: result });
     });
 
     //find cartePrice
     const cartePrice = $(".amount").text();
-    cartePrice ? customPrices.push({ value: cartePrice }) : null;
+    cartePrice ? custom.push({ value: cartePrice }) : null;
 
     //return
-    return (this.finalResult.result.custom.price = [...customPrices]);
+    return (this.finalResult.result.custom.prices = custom);
   }
 }
 
 const abc = new scrapeHtml();
-abc.startScrape("test.html");
-console.log(abc.finalResult.result.custom.price);
+abc.startScrape("test.html", "test.json");
