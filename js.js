@@ -1,6 +1,6 @@
 const fs = require("fs");
 const cheerio = require("cheerio");
-
+const { formatHour, formatMoney, formatDate } = require("./util/format");
 class scrapeHtml {
   constructor() {
     this.finalResult = {
@@ -31,15 +31,21 @@ class scrapeHtml {
     //code
     const code = $(
       "#block-travel .digital-box-cell > .block-pnr .pnr-ref .pnr-info"
-    ).text();
+    )
+      .text()
+      .trim();
     //name
     const name = $(
       "#block-travel .digital-box-cell > .block-pnr .pnr-name .pnr-info"
-    ).text();
+    )
+      .text()
+      .trim();
     //price
-    const totalPrice = $(
-      "#block-payment .digital-box-cell > .total-amount .very-important"
-    ).text();
+    const totalPrice = formatMoney(
+      $(
+        "#block-payment .digital-box-cell > .total-amount .very-important"
+      ).text()
+    );
     const trips = {
       code: code,
       name: name,
@@ -52,47 +58,66 @@ class scrapeHtml {
   }
 
   detailsRoundTrips($) {
+    //get dates data
+    let dates = [];
+    const regex = /\d{2}.\d{2}.\d{4}/g;
+    $("#block-travel div[id^=travel]").each((i, el) => {
+      const date = $(el)
+        .find($(".block-pnr .pnr-summary"))
+        .text()
+        .match(regex);
+      dates = dates.concat(date);
+    });
+
+    //
     const roundTrips = [];
     $(".product-details").each((i, el) => {
-      const date = $(el)
-        .prev()
-        .find($(".product-travel-date"))
-        .text();
       const direction = $(el)
         .find($(".travel-way"))
-        .text();
-      const departureTime = $(el)
-        .find($(".origin-destination-hour.segment-departure"))
-        .text();
+        .text()
+        .trim();
+      const departureTime = formatHour(
+        $(el)
+          .find($(".origin-destination-hour.segment-departure"))
+          .text()
+      );
       const departureStation = $(el)
         .find($(".origin-destination-station.segment-departure"))
-        .text();
-      const arrivalTime = $(el)
-        .find($(".origin-destination-hour.segment-arrival"))
-        .text();
+        .text()
+        .trim();
+      const arrivalTime = formatHour(
+        $(el)
+          .find($(".origin-destination-hour.segment-arrival"))
+          .text()
+      );
       const arrivalStation = $(el)
         .find($(".origin-destination-station.segment-arrival"))
-        .text();
+        .text()
+        .trim();
       const typeTrain = $(el)
         .find($(".segment"))
         .first()
-        .text();
+        .text()
+        .trim();
       const idTrain = $(el)
         .find($(".segment"))
         .first()
         .next()
-        .text();
+        .text()
+        .trim();
       const roundTrip = {
         type: direction,
-        date: date,
-        trains: {
-          departureTime: departureTime,
-          departureStation: departureStation,
-          arrivalTime: arrivalTime,
-          arrivalStation: arrivalStation,
-          type: typeTrain,
-          number: idTrain
-        }
+        date: formatDate(dates[i]),
+        trains: [
+          {
+            departureTime: departureTime,
+            departureStation: departureStation,
+            arrivalTime: arrivalTime,
+            arrivalStation: arrivalStation,
+            type: typeTrain,
+            number: idTrain
+          }
+        ]
       };
       roundTrips[i] = roundTrip;
     });
@@ -101,16 +126,18 @@ class scrapeHtml {
   customPrices($) {
     //find trip price then loop through array
     const custom = [];
-    $(".product-header > tbody >tr").each((i, currEl) => {
-      const result = $(currEl)
-        .children()
-        .last()
-        .text();
-      custom.push({ value: result });
+    $(".product-header > tbody >tr").each((i, el) => {
+      const priceTravel = formatMoney(
+        $(el)
+          .children()
+          .last()
+          .text()
+      );
+      custom.push({ value: priceTravel });
     });
 
     //find cartePrice
-    const cartePrice = $(".amount").text();
+    const cartePrice = formatMoney($(".amount").text());
     cartePrice ? custom.push({ value: cartePrice }) : null;
 
     //return
