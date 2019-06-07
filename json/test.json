@@ -1,5 +1,5 @@
 {
-  "status": "",
+  "status": "ok",
   "result": {
     "trips": [
       {
@@ -34,10 +34,10 @@
                   "type": "TGV",
                   "number": "6618",
                   "passenger": [
-                    { "type": "échangeable", "age": ["(26 à 59 ans)"] },
-                    { "type": "échangeable", "age": ["(26 à 59 ans)"] },
-                    { "type": "échangeable", "age": ["(4 à 11 ans)"] },
-                    { "type": "échangeable", "age": ["(0 à 3 ans)"] }
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(4 à 11 ans)" },
+                    { "type": "échangeable", "age": "(0 à 3 ans)" }
                   ]
                 }
               ]
@@ -68,10 +68,10 @@
                   "type": "TGV",
                   "number": "6122",
                   "passenger": [
-                    { "type": "échangeable", "age": ["(26 à 59 ans)"] },
-                    { "type": "échangeable", "age": ["(26 à 59 ans)"] },
-                    { "type": "échangeable", "age": ["(4 à 11 ans)"] },
-                    { "type": "échangeable", "age": ["(0 à 3 ans)"] }
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(4 à 11 ans)" },
+                    { "type": "échangeable", "age": "(0 à 3 ans)" }
                   ]
                 }
               ]

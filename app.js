@@ -5,7 +5,7 @@ const { formatHour, formatMoney, formatDate } = require("./util/format");
 class scrapeHtml {
   constructor() {
     this.finalResult = {
-      status: "",
+      status: "ok",
       result: {
         trips: [],
         custom: {}
@@ -142,7 +142,7 @@ class scrapeHtml {
           .each((i, el) => {
             const ageRange = $(el)
               .text()
-              .match(/\(([^)]+)\)/g);
+              .match(/\(([^)]+)\)/g)[0];
             passengers[i] = { ...passengers[i], age: ageRange };
           });
       }
