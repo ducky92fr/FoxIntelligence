@@ -52,7 +52,13 @@
                   "arrivalTime": "19:17",
                   "arrivalStation": "AVIGNON TGV",
                   "type": "TGV",
-                  "number": "6121"
+                  "number": "6121",
+                  "passenger": [
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(26 à 59 ans)" },
+                    { "type": "échangeable", "age": "(4 à 11 ans)" },
+                    { "type": "échangeable", "age": "(0 à 3 ans)" }
+                  ]
                 }
               ]
             },

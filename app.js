@@ -7,16 +7,16 @@ class scrapeHtml {
     this.finalResult = {
       status: "ok",
       result: {
-        trips: [],
-        custom: {}
+        trips: [], //in charge by detailsRoundTrips and ResultTrips method
+        custom: {} //in charge by customPrices method
       }
     };
   }
 
-  startScrape(htmlFile, jsonFile) {
+  startScrape(fileName) {
     //read File and load to cheerio
     const htmlContent = fs.readFileSync(
-      __dirname + `/html/${htmlFile}`,
+      __dirname + `/html/${fileName}.html`,
       "utf8"
     );
     const $ = cheerio.load(htmlContent);
@@ -25,7 +25,7 @@ class scrapeHtml {
 
     //Convert to JSON and write the file
     const json = JSON.stringify(this.finalResult);
-    fs.writeFileSync(__dirname + `/json/${jsonFile}`, json);
+    fs.writeFileSync(__dirname + `/json/${fileName}.json`, json);
   }
 
   resultTrips($, roundTrips) {
@@ -66,7 +66,7 @@ class scrapeHtml {
         .find($(".block-pnr .pnr-summary"))
         .text()
         .match(/\d{2}.\d{2}.\d{4}/g);
-      dates = dates.concat(date);
+      dates = dates.concat(date).map(el => formatDate(el));
     });
 
     //Create array direction to check when to push passenger Array into Object
@@ -150,7 +150,7 @@ class scrapeHtml {
       //Create roundTrip Object
       const roundTrip = {
         type: direction,
-        date: formatDate(dates[i]),
+        date: dates[i],
         trains: [
           {
             departureTime: departureTime,
@@ -191,4 +191,4 @@ class scrapeHtml {
 }
 
 const scrapeMachine = new scrapeHtml();
-scrapeMachine.startScrape("test.html", "test.json");
+scrapeMachine.startScrape("fox");

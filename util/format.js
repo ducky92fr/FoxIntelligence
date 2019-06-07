@@ -7,6 +7,8 @@ exports.formatHour = el => {
 };
 
 exports.formatDate = el => {
+  if (!el) return null;
+
   const date = new Date(
     el
       .split("/")
