@@ -143,10 +143,10 @@ class scrapeHtml {
             const ageRange = $(el)
               .text()
               .match(/\(([^)]+)\)/g);
-            console.log(ageRange);
             passengers[i] = { ...passengers[i], age: ageRange };
           });
       }
+
       //Create roundTrip Object
       const roundTrip = {
         type: direction,
