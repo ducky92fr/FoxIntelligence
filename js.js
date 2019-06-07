@@ -61,12 +61,11 @@ class scrapeHtml {
   detailsRoundTrips($) {
     //get dates data
     let dates = [];
-    const regex = /\d{2}.\d{2}.\d{4}/g;
     $("#block-travel div[id^=travel]").each((i, el) => {
       const date = $(el)
         .find($(".block-pnr .pnr-summary"))
         .text()
-        .match(regex);
+        .match(/\d{2}.\d{2}.\d{4}/g);
       dates = dates.concat(date);
     });
 
@@ -123,8 +122,31 @@ class scrapeHtml {
         ? (hasPassenger = true)
         : (hasPassenger = false);
 
-      //If hasPassenger is true then extract data to push into Object. If false dont do anything
-
+      //If hasPassenger is true then create passenger array  if false do nothing
+      let passengers = [];
+      if (hasPassenger) {
+        $(el)
+          .next()
+          .find($(".fare-details"))
+          .each((i, el) => {
+            const typeTicket = $(el)
+              .text()
+              .includes("Billet échangeable")
+              ? "échangeable"
+              : "non échangeable";
+            passengers[i] = { type: typeTicket };
+          });
+        $(el)
+          .next()
+          .find($(".typology"))
+          .each((i, el) => {
+            const ageRange = $(el)
+              .text()
+              .match(/\(([^)]+)\)/g);
+            console.log(ageRange);
+            passengers[i] = { ...passengers[i], age: ageRange };
+          });
+      }
       //Create roundTrip Object
       const roundTrip = {
         type: direction,
@@ -137,7 +159,7 @@ class scrapeHtml {
             arrivalStation: arrivalStation,
             type: typeTrain,
             number: idTrain,
-            ...(hasPassenger ? { passenger: [1] } : false)
+            ...(hasPassenger ? { passenger: passengers } : false)
           }
         ]
       };
