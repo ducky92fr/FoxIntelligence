@@ -1,3 +1,8 @@
+Before running the test
+As i use cheerio package please :
+
+- npm init
+
 Running test
 
 - To run the test, you need to put the htlm file into html folder and give it a name.
